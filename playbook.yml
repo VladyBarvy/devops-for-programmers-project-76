@@ -1,0 +1,29 @@
+---
+- hosts: all
+  become: yes
+  tags: deploy
+  
+  tasks:
+    - name: create env
+      ansible.builtin.template:
+        src: templates/env.j2
+        dest: .env
+        mode: "0644"
+    - name: Запустить Redmine в контейнере
+      community.docker.docker_container:
+        image: redmine:{{ app_tag }}
+        platform: linux/amd64
+        name: redmine
+        state: started
+        restart_policy: "always"
+        restart: true
+        ports:
+          - "{{ app_port }}:3000"
+        env_file: .env
+        
+       
+        
+- hosts: webservers
+  roles:
+   - { role: datadog.datadog, become: yes }
+  tags: datadog
