@@ -1,18 +1,22 @@
 ---
-- hosts: all
-  become: yes
+- name: "Развёртывание Redmine"
+  hosts: all
+  become: true
   tags: deploy
-  
+
   tasks:
-    - name: Установить requests
-      ansible.builtin.raw: /opt/venv/bin/pip install requests
-      become: yes
-    - name: create env
+    - name: "Установить requests"
+      ansible.builtin.pip:
+        name: requests
+        executable: /opt/venv/bin/pip
+
+    - name: "Create env file"
       ansible.builtin.template:
         src: templates/env.j2
         dest: .env
         mode: "0644"
-    - name: Запустить Redmine в контейнере
+
+    - name: "Запустить Redmine в контейнере"
       community.docker.docker_container:
         image: redmine:{{ app_tag }}
         platform: linux/amd64
@@ -23,10 +27,9 @@
         ports:
           - "{{ app_port }}:3000"
         env_file: .env
-        
-       
-        
-- hosts: webservers
+
+- name: "Настройка Datadog"
+  hosts: webservers
   roles:
-   - { role: datadog.datadog, become: yes }
+    - { role: datadog.datadog, become: true }
   tags: datadog
