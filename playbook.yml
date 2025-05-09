@@ -4,6 +4,9 @@
   tags: deploy
   
   tasks:
+    - name: Установить requests
+      ansible.builtin.raw: /opt/venv/bin/pip install requests
+      become: yes
     - name: create env
       ansible.builtin.template:
         src: templates/env.j2
